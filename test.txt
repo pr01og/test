@@ -1,0 +1,10 @@
+mkdir test
+cd test
+touch test.txt
+
+git init
+
+git add test.txt
+git commit -m "First Commit"
+
+git status
