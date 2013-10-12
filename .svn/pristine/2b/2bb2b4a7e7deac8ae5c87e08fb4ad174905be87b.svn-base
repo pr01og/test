@@ -1,0 +1,32 @@
+package com.interpay.terminal.data.sqlite;
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import com.interpay.terminal.util.Const;
+
+/**
+ * @author Sergey Khokhlov
+ */
+class OpenHelper extends SQLiteOpenHelper {
+    private static final String DB_NAME = "interpay.terminal.db";
+
+    public OpenHelper(Context context) {
+        super(context, DB_NAME, null, Const.DB_VERSION);
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        for (Tables table : Tables.values()) {
+            db.execSQL(table.getValue().generateCreateScript());
+        }
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        for (Tables table : Tables.values()) {
+            db.execSQL(table.getValue().generateDropScript());
+        }
+        onCreate(db);
+    }
+}

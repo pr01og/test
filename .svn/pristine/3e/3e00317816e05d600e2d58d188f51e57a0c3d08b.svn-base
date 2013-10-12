@@ -1,0 +1,11 @@
+package com.interpay.terminal.data.sqlite.mediators;
+
+/**
+ * @author Sergey Khokhlov
+ */
+public enum RequestType {
+    TerminalServices,
+    GroupsList,
+    ServiceList,
+    GetParams
+}

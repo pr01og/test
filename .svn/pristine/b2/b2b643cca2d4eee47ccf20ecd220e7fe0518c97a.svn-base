@@ -1,0 +1,28 @@
+package com.interpay.terminal.util;
+
+/**
+ * @author Stanislav Shamji
+ */
+public class ButtonEntry {
+    private String tag;
+    private String name;
+    private String id;
+
+    public ButtonEntry(String name, String tag) {
+        this.name = name;
+        this.tag = tag;
+    }
+
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public String getTag() {
+        return tag;
+    }
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+}

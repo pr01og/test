@@ -1,0 +1,79 @@
+package com.probojnik.terminal.data.synchronization;
+
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
+import android.util.Log;
+import com.probojnik.terminal.data.sqlite.DataHelper;
+
+/**
+ * @author Stanislav Shamji
+ */
+public class SyncEntry {
+
+    //private final DataHelper helper;
+    private final SQLiteDatabase db;
+    private String statusCode;
+    private String statusDetail;
+    private String time;
+    private long rows = 0;
+
+    public SyncEntry(DataHelper helper) {
+        //this.helper = helper;
+        db = helper.getDB(true);
+        db.beginTransaction();
+    }
+
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    public String getStatusDetail() {
+        return statusDetail;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setStatusCode(String statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void setStatusDetail(String statusDetail) {
+        this.statusDetail = statusDetail;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public void addRow(String row) throws SQLiteException {
+        if (row.contains("update or insert")) {
+            row = row.replaceFirst("update or insert", "insert or replace");
+        }
+        if (row.contains("matching(")) {
+            row = row.substring(0, row.indexOf("matching("));
+        }
+        Log.v(SyncService.TAG, "Executing " + row);
+        try {
+            db.execSQL(row);
+            rows++;
+        } catch (SQLiteException ex) {
+            if (!row.toUpperCase().startsWith("ALTER") && ex.getMessage().contains("duplicate column name")) {
+                db.endTransaction();
+                db.close();
+                throw ex;
+            }
+        }
+    }
+
+    public void closeDB() {
+        db.setTransactionSuccessful();
+        db.endTransaction();
+        db.close();
+    }
+
+    public long getRows() {
+        return rows;
+    }
+}

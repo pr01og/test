@@ -1,0 +1,17 @@
+package com.interpay.terminal.view;
+
+import com.interpay.terminal.data.sqlite.mediators.Request;
+import com.interpay.terminal.network.RequestParam;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @author Stanislav Shamji
+ */
+public interface CallbackListener {
+    public short addButtons(MainActivity mainActivity, List<Map<String, String>> responseArrayList, Request request);
+    public short fillLayout(MainActivity mainActivity, List<Map<String, String>> responseArrayList, Request request);
+}

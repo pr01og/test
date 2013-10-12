@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.probojnik.terminal</groupId>
+    <artifactId>Terminal</artifactId>
+    <version>0.1</version>
+    <packaging>apk</packaging>
+    <name>Terminal</name>
+
+    <build>
+        <sourceDirectory>src</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+                <artifactId>maven-android-plugin</artifactId>
+                <version>2.8.4</version>
+                <configuration>
+                    <sdk>
+                        <platform>8</platform>
+                    </sdk>
+                    <file>${project.build.directory}/${project.artifactId}-${project.version}-aligned.apk</file>
+                    <emulator>
+                        <avd>YOUR_AVD_NAME</avd>
+                        <options>-snapshot 1 -scale 0.8</options>
+                    </emulator>
+                    <sign>
+                        <debug>false</debug>
+                    </sign>
+                    <zipalign>
+                        <verbose>true</verbose>
+                        <skip>false</skip>
+                    </zipalign>
+                    <deleteConflictingFiles>true</deleteConflictingFiles>
+                    <undeployBeforeDeploy>true</undeployBeforeDeploy>
+                </configuration>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>alignApk</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>zipalign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.android</groupId>
+            <artifactId>android</artifactId>
+            <version>2.1.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.roboguice</groupId>
+            <artifactId>roboguice</artifactId>
+            <version>2.0</version>
+        </dependency>
+    </dependencies>
+</project>

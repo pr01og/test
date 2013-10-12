@@ -1,0 +1,98 @@
+package com.interpay.terminal.network;
+
+import com.interpay.terminal.view.FillLayoutActivity;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class ParseXml extends FillLayoutActivity {
+
+    public static List<Map<String, String>> parseXML(String xml, Map<RequestParam, String> requestHashMap) {
+        List<Map<String, String>> arrayList;
+        Map<String, String> hashMap;
+        arrayList = new ArrayList<Map<String, String>>();
+
+        //String req_typeReplace = request_typeReplace(requestHashMap.get(RequestParam.RequestType));
+
+        try {
+            //XmlPullParser xpp = prepareXpp();
+
+            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+            XmlPullParser xpp = factory.newPullParser();
+
+            xpp.setInput(new StringReader(xml));
+
+            //System.out.println("xpp = " + xpp);
+
+            while (xpp.getEventType() != XmlPullParser.END_DOCUMENT) {
+                switch (xpp.getEventType()) {
+                    case XmlPullParser.START_DOCUMENT: // начало документа
+                        //System.out.println("START_DOCUMENT");
+                        break;
+                    case XmlPullParser.START_TAG: // начало тэга
+                        //System.out.println("START_TAG: name = " + xpp.getName() + ", depth = " + xpp.getDepth() + ", attrCount = " + xpp.getAttributeCount());
+                        //System.out.println("xpp.getName() = " + xpp.getName() + " -- " + ((xpp.getName().equals(req_typeReplace))?1:0) );
+                        if (xpp.getName().equals(FillLayoutActivity.customXMLparser(requestHashMap.get(RequestParam.RequestType), 0))) { // мы в <service> <row1> <row>
+                            hashMap = new HashMap<String, String>();
+                            for (int i = 0; i < xpp.getAttributeCount(); i++) {
+                                hashMap.put(xpp.getAttributeName(i), xpp.getAttributeValue(i));
+                                System.out.println("ParseXml | parseXML | Attribute = " + xpp.getAttributeName(i) + " = " + xpp.getAttributeValue(i));
+                            }
+                            arrayList.add((HashMap<String, String>) hashMap);
+                            System.out.println("arrayList.add");
+                        }
+                        break;
+                    case XmlPullParser.END_TAG: // конец тэга
+                        //System.out.println("END_TAG: name = " + xpp.getName());
+                        break;
+                    case XmlPullParser.TEXT: // содержимое тэга
+                        //System.out.println("text = " + xpp.getText());
+                        break;
+                    default:
+                        break;
+                }
+                xpp.next(); // следующий элемент
+            }
+            //System.out.println("END_DOCUMENT");
+
+
+        } catch (XmlPullParserException e) {
+            System.out.println("XmlPullParserException = " + e);
+        } catch (IOException e) {
+            System.out.println("IOException = " + e);
+        }
+
+        return arrayList;
+    }
+
+
+
+/*    private static String request_typeReplace(String s) {
+        String r;
+        if (s == null) {
+            r = "null";
+        } else if (s.equals("terminalservices")) {
+            r = "service";
+        } else if (s.equals("groupslist")) {
+            r = "row1";
+        } else if (s.equals("servicelist")) {
+            r = "row";
+        } else if (s.equals("getparams")) {
+            r = "row";
+        } else
+            r = "null";
+
+        return r;
+    }*/
+
+}

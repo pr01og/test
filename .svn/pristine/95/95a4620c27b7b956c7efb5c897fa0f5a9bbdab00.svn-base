@@ -1,0 +1,254 @@
+package com.interpay.terminal.view;
+
+import android.app.Activity;
+import android.content.SharedPreferences;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import com.interpay.terminal.R;
+import com.interpay.terminal.data.sqlite.mediators.Request;
+import com.interpay.terminal.data.sqlite.mediators.RequestType;
+import com.interpay.terminal.network.ParseXml;
+import com.interpay.terminal.util.ButtonAdapter;
+import com.interpay.terminal.util.ButtonEntry;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.*;
+
+/**
+ * @author Stanislav Shamji
+ */
+public abstract class FillLayoutActivity extends Activity implements CallbackListener {
+
+    public View.OnClickListener onClickListener;
+    ArrayList<ButtonEntry> mainArrayListButtonEntry;
+    ButtonAdapter mainButtonAdapter;
+    private JSONObject jsonObject;
+    //private HashMap<RequestParam, String> requestHashMap;
+
+    public SharedPreferences sharedPreferences;
+    public final String PREFS_NAME = "TerminalLogin";
+    public final String LOGIN = "login";
+    public final String SESSION = "session";
+
+    public final String rightLogin = "log";
+    public final String rightPassword = "pass";
+    public final int timeOut = 1000*5; // 5 seconds
+
+
+    public short fillLayout(MainActivity mainActivity, List<Map<String, String>> responseArrayList, Request request) {
+        boolean addButtons = request.getRequestType().equals("getparams") ? false : true;
+
+        short i = 0; // -32768 до 32767
+        LinearLayout linearLayout;
+        Button button;
+
+        if (request.getRequestType().equals(RequestType.GetParams)) {
+            for (Map<String, String> responseHashMap : responseArrayList) { // iterate over responseArrayList
+                System.out.println("responseHashMap.toString() = " + responseHashMap.toString());
+//                if (addButtons)
+//                    linearLayout.addView(addButton(mainActivity, responseHashMap, request)); //  add Button
+//                else
+//                    parsingResponse(mainActivity, responseHashMap, request, linearLayout);
+            }
+        }else
+            i = addButtons(mainActivity, responseArrayList, request);
+
+        return i;
+    }
+
+    public short addButtons(MainActivity mainActivity, List<Map<String, String>> responseArrayList, Request request) {
+        short i = 0; // -32768 до 32767
+
+        mainArrayListButtonEntry.clear();
+        if (!ParseXml.customXMLparser(request.getRequestType().toString(), 0).equals("null")) {
+            for (Map<String, String> responseHashMap : responseArrayList) {
+                String name = (String) responseHashMap.get(ParseXml.customXMLparser(request.getRequestType().toString(), 2) + "name");
+                String tag = hashMap2JSONObject(responseHashMap);
+                System.out.println("addButtons | name = " + name + ", tag = " + tag);
+                mainArrayListButtonEntry.add(new ButtonEntry(name, tag));
+//                linearLayout.addView(addButton(mainActivity, responseHashMap, request)); //  add Button
+                i++;
+            }
+        }
+        mainButtonAdapter.notifyDataSetChanged();
+
+
+        return i;
+    }
+
+    private Button addButton(MainActivity mainActivity, Map<String, String> responseHashMap, Request request) {
+        Button button;
+        button = new Button(mainActivity);
+        button.setTextSize(mainActivity.getResources().getDimension(R.dimen.listButtons)); //  TextSize
+        button.setText((String) responseHashMap.get(ParseXml.customXMLparser(request.getRequestType().toString(), 2) + "name"));  //  servicename, groupname, opername
+        button.setTag(hashMap2JSONObject(responseHashMap));  //  JSONObject in tag
+        System.out.println("responseHashMap = " + hashMap2JSONObject(responseHashMap));
+        button.setOnClickListener(onClickListener);
+
+        return button;
+    }
+
+    private String hashMap2JSONObject(Map<String, String> requestHashMap) {
+        JSONObject jsonObject = new JSONObject(requestHashMap);
+        return jsonObject.toString();
+    }
+
+    private LinearLayout parsingResponse(MainActivity mainActivity, Map<String, String> responseHashMap, Request request, LinearLayout linearLayout) {
+        if (responseHashMap.containsKey("docstateid")) {
+            String docstateid = responseHashMap.get("docstateid");
+
+        }
+        if (responseHashMap.containsKey("docname")) {
+            String docname = responseHashMap.get("docname");
+            TextView textView;
+            textView = new TextView(mainActivity);
+            textView.setText(docname);
+            linearLayout.addView(textView);
+        }
+        if (responseHashMap.containsKey("purpose")) {
+            String purpose = responseHashMap.get("purpose"); // <FIO;s;Введите Ф.И.О.><TIN;s;Введите ИНН><SUM;f;Введите сумму>
+
+        }
+        if (responseHashMap.containsKey("rate")) {
+
+        }
+        if (responseHashMap.containsKey("comis")) {
+
+        }
+        if (responseHashMap.containsKey("amounttype")) {
+
+        }
+        if (responseHashMap.containsKey("amountroundtype")) {
+
+        }
+        if (responseHashMap.containsKey("minamount")) {
+
+        }
+        if (responseHashMap.containsKey("maxamount")) {
+
+        }
+        if (responseHashMap.containsKey("companyname")) {
+            String companyname = responseHashMap.get("companyname");
+            TextView textView;
+            textView = new TextView(mainActivity);
+            textView.setText(companyname);
+            linearLayout.addView(textView);
+        }
+        if (responseHashMap.containsKey("mfo")) {
+
+        }
+        if (responseHashMap.containsKey("bankname")) {
+            String bankname = responseHashMap.get("bankname");
+            TextView textView;
+            textView = new TextView(mainActivity);
+            textView.setText(bankname);
+            linearLayout.addView(textView);
+
+        }
+        if (responseHashMap.containsKey("okpo")) {
+
+        }
+        if (responseHashMap.containsKey("account")) {
+
+        }
+        if (responseHashMap.containsKey("pcopy")) {
+
+        }
+        return linearLayout;
+    }
+
+    /*                      | i=0           | i=1           | i=2
+     * s = terminalservices | <service      | serviceid     | servicename   |
+     * s = groupslist       | <row1         | groupid       | groupname     |
+     * s = servicelist      | <row          | operstateid   | opername      |
+     * s = getparams        | <row          |               |               |
+     * */
+    public static String customXMLparser(String s, int i) { // i=0
+        String result = "null";
+
+        //System.out.println("customXMLparser s = " + s + ", i = " + i);
+
+        String JSONstring = "{'" + RequestType.TerminalServices + "':['service','service','service']," +
+                "'" + RequestType.GroupsList + "':['row1','group','group']," +
+                "'" + RequestType.ServiceList + "':['row','operstate','oper']," +
+                "'" + RequestType.GetParams + "':['row','','']}";
+        try {
+            JSONObject jsonObject = new JSONObject(JSONstring);
+
+            result = jsonObject.getJSONArray(s).getString(i);    // String
+        } catch (JSONException e) {
+            System.err.println("JSONException e = " + e.getCause());
+        }
+        return result;
+    }
+
+    String department="", groupid="";
+
+    public Request returnRequest(String req) {
+//        UserPreferences preferences = new UserPreferences(this);
+        Request request = null;
+        System.out.println("req = " + req);
+        if (req.equals("terminalservices")) {                                               // 0
+            request = Request.createTerminalServicesRequest();
+        } else {    // 1, 2, 3, 4
+            try {
+                jsonObject = new JSONObject(req);
+                if (req.contains("serviceid")) {                                            // 1
+                    department = jsonObject.getString("serviceid");
+                    String parent = "";
+                    request =  Request.createGroupsListRequest(department, parent);
+                }
+                if (req.contains("groupid") && jsonObject.toString().contains("isNext")) {  // 2&3
+                    groupid = jsonObject.getString("groupid");
+                    String isnext = jsonObject.getString("isNext");
+                    if (isnext.equals("1")) {                                               // 2
+                        request =  Request.createGroupsListRequest(department,groupid);
+                    } else {                                                                // 3
+                        String groupid = jsonObject.getString("groupid");
+                        request =  Request.createServiceListRequest(department, groupid);
+                    }
+                }
+                if (req.contains("operstateid")) {                                           // 4  inputs$select
+                    String ovirServiceID = jsonObject.getString("operstateid");
+                    request =  Request.createGetParamsRequest(ovirServiceID);
+                }
+                if (req.contains("getparams")) {                                             // 5   toServer
+                    String getparams = jsonObject.getString("getparams");
+                    System.out.println("getparams = " + getparams);
+                }
+            } catch (JSONException e) {
+                System.err.println("MainActivity | returnRequest | e = " + e);
+            }
+        }
+        System.out.println(", request = " + request);
+        return request;
+    }
+
+    Boolean getSession(){ //
+        Boolean sessionOut = true;
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        Long secondTime = calendar.getTimeInMillis();
+        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        Long firstTime = sharedPreferences.getLong(SESSION, 0);
+
+        if(secondTime - firstTime - timeOut > 0)  // secondTime != 0 &&  // предположим что onPause() срабатывает всегда
+            finish();
+        else
+            sessionOut = false;
+
+        System.out.println("getSession | st-ft = " + (secondTime - firstTime) + ", st-ft-to = " + (secondTime - firstTime - timeOut) + ", sessionOut = " + sessionOut);
+
+        return sessionOut;
+    }
+    void setSession(){
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        System.out.println("setSession | calendar.getTimeInMillis() = " + calendar.getTimeInMillis());
+        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putLong(SESSION, calendar.getTimeInMillis());
+        editor.commit();
+    }
+}
